@@ -18,14 +18,11 @@ import com.adminspec.capability.PlayerSpecData;
 import com.adminspec.network.SpecStatePayload;
 import com.adminspec.spec.MoveContext;
 import com.adminspec.spec.SpecMove;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import org.joml.Vector3f;
 
 public class ReverseFlowProtectionSealMove
 extends SpecMove {
@@ -84,39 +81,39 @@ extends SpecMove {
         double px = player.getX();
         double py = player.getY();
         double pz = player.getZ();
-        // Dense blue dust ring around the player — visible to self and others
-        for (i = 0; i < 16; ++i) {
+        // Glowing END_ROD ring — highly visible to the player and nearby players
+        for (i = 0; i < 10; ++i) {
             angle = Math.random() * Math.PI * 2.0;
             double y = py + 0.3 + Math.random() * 1.5;
-            double radius = 0.7 + (Math.random() - 0.5) * 0.2;
+            double radius = 0.6 + Math.random() * 0.4;
             double dx = px + Math.cos(angle) * radius;
             double dz = pz + Math.sin(angle) * radius;
-            sl.sendParticles(player, (ParticleOptions)new DustParticleOptions(new Vector3f(0.3f, 0.7f, 1.0f), 3.0f), true, dx, y, dz, 1, 0.02, -0.03, 0.02, 0.0);
-            sl.sendParticles((ParticleOptions)new DustParticleOptions(new Vector3f(0.3f, 0.7f, 1.0f), 3.0f), dx, y, dz, 1, 0.02, -0.03, 0.02, 0.0);
+            sl.sendParticles(ParticleTypes.END_ROD, dx, y, dz, 1, 0.03, 0.02, 0.03, 0.0);
         }
-        // Bright end rod sparkles for visibility
-        for (i = 0; i < 4; ++i) {
+        // Blue soul fire flame around the body
+        for (i = 0; i < 6; ++i) {
             angle = Math.random() * Math.PI * 2.0;
-            double y = py + 0.5 + Math.random() * 1.2;
-            double radius = 0.6 + Math.random() * 0.3;
+            double y = py + 0.5 + Math.random() * 1.3;
+            double radius = 0.5 + Math.random() * 0.3;
             double dx = px + Math.cos(angle) * radius;
             double dz = pz + Math.sin(angle) * radius;
-            sl.sendParticles(ParticleTypes.END_ROD, dx, y, dz, 1, 0.05, 0.05, 0.05, 0.01);
+            sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, dx, y, dz, 1, 0.02, 0.02, 0.02, 0.0);
         }
+        // Falling water particles
         for (i = 0; i < 3; ++i) {
             angle = Math.random() * Math.PI * 2.0;
-            double dx = px + Math.cos(angle) * 0.45;
-            double dz = pz + Math.sin(angle) * 0.45;
-            sl.sendParticles(player, (ParticleOptions)ParticleTypes.FALLING_WATER, true, dx, py + 0.3, dz, 1, 0.0, -0.05, 0.0, 0.0);
-            sl.sendParticles((ParticleOptions)ParticleTypes.FALLING_WATER, dx, py + 0.3, dz, 1, 0.0, -0.05, 0.0, 0.0);
+            double dx = px + Math.cos(angle) * 0.5;
+            double dz = pz + Math.sin(angle) * 0.5;
+            sl.sendParticles(ParticleTypes.FALLING_WATER, dx, py + 0.5, dz, 1, 0.0, -0.05, 0.0, 0.0);
         }
+        // Ground splash
         if (Math.random() < 0.4) {
             double angle2 = Math.random() * Math.PI * 2.0;
             double splashRadius = 0.65 + Math.random() * 0.3;
             double dx = px + Math.cos(angle2) * splashRadius;
             double dz = pz + Math.sin(angle2) * splashRadius;
-            sl.sendParticles(player, (ParticleOptions)ParticleTypes.SPLASH, true, dx, py + 0.1, dz, 2, 0.0, 0.1, 0.0, 0.1);
-            sl.sendParticles((ParticleOptions)ParticleTypes.SPLASH, dx, py + 0.1, dz, 2, 0.0, 0.1, 0.0, 0.1);
+            sl.sendParticles(ParticleTypes.SPLASH, dx, py + 0.1, dz, 2, 0.0, 0.1, 0.0, 0.1);
+            sl.sendParticles(ParticleTypes.END_ROD, dx, py + 0.1, dz, 1, 0.0, 0.1, 0.0, 0.05);
         }
     }
 }

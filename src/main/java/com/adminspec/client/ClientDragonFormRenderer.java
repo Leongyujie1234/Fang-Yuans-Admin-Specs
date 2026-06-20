@@ -58,11 +58,9 @@ public final class ClientDragonFormRenderer {
     }
 
     private static GeoModel dragonModel = null;
-    private static boolean loadAttempted = false;
 
     private static void loadModel() {
-        if (loadAttempted) return;
-        loadAttempted = true;
+        if (dragonModel != null) return;
         try {
             ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("adminspec",
                 "models/entity/ancient_sword_dragon.geo.json");

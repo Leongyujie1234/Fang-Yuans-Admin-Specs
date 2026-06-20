@@ -1,52 +1,14 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  net.minecraft.core.BlockPos
- *  net.minecraft.core.Holder
- *  net.minecraft.core.particles.ParticleOptions
- *  net.minecraft.core.particles.ParticleTypes
- *  net.minecraft.nbt.CompoundTag
- *  net.minecraft.network.syncher.EntityDataAccessor
- *  net.minecraft.network.syncher.EntityDataSerializer
- *  net.minecraft.network.syncher.EntityDataSerializers
- *  net.minecraft.network.syncher.SynchedEntityData
- *  net.minecraft.network.syncher.SynchedEntityData$Builder
- *  net.minecraft.server.level.ServerLevel
- *  net.minecraft.sounds.SoundEvents
- *  net.minecraft.sounds.SoundSource
- *  net.minecraft.world.damagesource.DamageSource
- *  net.minecraft.world.entity.Entity
- *  net.minecraft.world.entity.EntityType
- *  net.minecraft.world.entity.LivingEntity
- *  net.minecraft.world.entity.Mob
- *  net.minecraft.world.entity.PathfinderMob
- *  net.minecraft.world.entity.ai.attributes.AttributeSupplier$Builder
- *  net.minecraft.world.entity.ai.attributes.Attributes
- *  net.minecraft.world.entity.ai.goal.FloatGoal
- *  net.minecraft.world.entity.ai.goal.Goal
- *  net.minecraft.world.entity.ai.goal.MeleeAttackGoal
- *  net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal
- *  net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal
- *  net.minecraft.world.entity.monster.Zombie
- *  net.minecraft.world.entity.player.Player
- *  net.minecraft.world.level.Level
- *  net.minecraft.world.level.Level$ExplosionInteraction
- *  net.minecraft.world.phys.AABB
- *  net.minecraft.world.phys.Vec3
- */
 package com.adminspec.entity;
 
 import com.adminspec.capability.BlockRecoveryManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
@@ -57,13 +19,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
@@ -71,10 +30,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class YamaChildEntity
-extends Zombie {
-    private static final EntityDataAccessor<Integer> OWNER_ID = SynchedEntityData.defineId(YamaChildEntity.class, (EntityDataSerializer)EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Boolean> FUSE_LIT = SynchedEntityData.defineId(YamaChildEntity.class, (EntityDataSerializer)EntityDataSerializers.BOOLEAN);
+public class YamaChildEntity extends Zombie {
+    private static final EntityDataAccessor<Integer> OWNER_ID = SynchedEntityData.defineId(YamaChildEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> FUSE_LIT = SynchedEntityData.defineId(YamaChildEntity.class, EntityDataSerializers.BOOLEAN);
     private static final int FUSE_TICKS = 20;
     private static final float TNT_DAMAGE = 48.0f;
     private static final float TNT_RADIUS = 4.0f;
@@ -86,6 +44,7 @@ extends Zombie {
         super(type, level);
         this.setBaby(true);
         this.setPersistenceRequired();
+        this.setNoGravity(true);
     }
 
     public void setOwner(Player owner) {
@@ -93,13 +52,10 @@ extends Zombie {
     }
 
     public Player getOwnerPlayer() {
-        Player p;
-        int id = (Integer)this.entityData.get(OWNER_ID);
-        if (id < 0 || this.level().isClientSide) {
-            return null;
-        }
+        int id = this.entityData.get(OWNER_ID);
+        if (id < 0 || this.level().isClientSide) return null;
         Entity e = this.level().getEntity(id);
-        return e instanceof Player ? (p = (Player)e) : null;
+        return e instanceof Player ? (Player) e : null;
     }
 
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
@@ -109,7 +65,12 @@ extends Zombie {
     }
 
     public static AttributeSupplier.Builder createYamaAttributes() {
-        return Zombie.createAttributes().add(Attributes.MOVEMENT_SPEED, 0.35).add(Attributes.MAX_HEALTH, 10.0).add(Attributes.ARMOR, 4.0).add(Attributes.ATTACK_DAMAGE, 1.0);
+        return Zombie.createAttributes()
+            .add(Attributes.MOVEMENT_SPEED, 0.35)
+            .add(Attributes.MAX_HEALTH, 10.0)
+            .add(Attributes.ARMOR, 4.0)
+            .add(Attributes.ATTACK_DAMAGE, 1.0)
+            .add(Attributes.FLYING_SPEED, 0.6);
     }
 
     public boolean isFuseLit() {
@@ -117,10 +78,15 @@ extends Zombie {
     }
 
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, (Goal)new FloatGoal((Mob)this));
-        this.goalSelector.addGoal(1, (Goal)new MeleeAttackGoal((PathfinderMob)this, 1.5, true));
-        this.goalSelector.addGoal(5, (Goal)new WaterAvoidingRandomStrollGoal((PathfinderMob)this, 1.0));
-        this.targetSelector.addGoal(1, (Goal)new NearestAttackableTargetGoal((Mob)this, LivingEntity.class, 10, true, false, (java.util.function.Predicate<LivingEntity>)(e -> !(e instanceof YamaChildEntity) && !e.equals(this.getOwnerPlayer()) && e.isAlive())));
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new FlyingHomingGoal(this, 0.6));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false,
+            e -> !(e instanceof YamaChildEntity) && !e.equals(this.getOwnerPlayer()) && e.isAlive()));
+    }
+
+    @Override
+    public boolean isNoGravity() {
+        return true;
     }
 
     protected boolean isSunBurnTick() {
@@ -130,41 +96,48 @@ extends Zombie {
     public void tick() {
         super.tick();
         ++this.lifetimeTicks;
-        if (this.lifetimeTicks > 600) {
+        if (this.lifetimeTicks > MAX_LIFETIME) {
             this.discard();
             return;
         }
-        // Flying behaviour: nullify gravity and hover so the child flies toward its target
-        // instead of walking. The spec calls these "flying baby zombies".
-        this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, 0.4, 1.0));
-        if (!this.isNoGravity()) {
-            this.setNoGravity(true);
-        }
+
+        // Flying homing toward target
         LivingEntity target = this.getTarget();
         if (target != null && target.isAlive()) {
-            // Steer toward target's body centre for a smooth flying intercept
-            Vec3 aim = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0)
-                .subtract(this.position().add(0.0, this.getBbHeight() * 0.5, 0.0));
+            Vec3 aim = target.getBoundingBox().getCenter().subtract(this.position());
             double dist = aim.length();
             if (dist > 0.1) {
-                double speed = 0.18; // blocks/tick (~3.6 b/s)
-                Vec3 push = aim.scale(speed / dist);
-                this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 0.6, 0.6).add(push));
+                double speed = 0.3;
+                Vec3 push = aim.normalize().scale(speed);
+                Vec3 vel = this.getDeltaMovement();
+                this.setDeltaMovement(vel.scale(0.7).add(push.scale(0.3)));
+                if (dist > 3.0) {
+                    this.setDeltaMovement(this.getDeltaMovement().add(0, 0.02, 0));
+                }
             }
+            this.lookAt(target, 30, 30);
+        } else {
+            // Hover in place
+            this.setDeltaMovement(this.getDeltaMovement().multiply(0.8, 0.8, 0.8));
+            this.setDeltaMovement(this.getDeltaMovement().add(0, Math.sin(this.tickCount * 0.05) * 0.005, 0));
         }
+
+        // Fuse logic
         if (this.fuseTimer > 0) {
             --this.fuseTimer;
             this.entityData.set(FUSE_LIT, true);
             if (this.level().isClientSide && this.random.nextFloat() < 0.4f) {
-                this.level().addParticle((ParticleOptions)ParticleTypes.SMOKE, this.getX() + (this.random.nextDouble() - 0.5) * 0.4, this.getY() + this.random.nextDouble() * 1.0, this.getZ() + (this.random.nextDouble() - 0.5) * 0.4, 0.0, 0.1, 0.0);
+                this.level().addParticle(ParticleTypes.SMOKE,
+                    this.getX() + (this.random.nextDouble() - 0.5) * 0.4,
+                    this.getY() + this.random.nextDouble() * 1.0,
+                    this.getZ() + (this.random.nextDouble() - 0.5) * 0.4,
+                    0.0, 0.1, 0.0);
             }
             if (this.fuseTimer == 0) {
                 this.detonate();
             }
-        } else {
-            if (target != null && this.distanceToSqr((Entity)target) < 6.25) {
-                this.fuseTimer = 20;
-            }
+        } else if (target != null && this.distanceToSqr(target) < 6.25) {
+            this.fuseTimer = FUSE_TICKS;
         }
     }
 
@@ -205,7 +178,7 @@ extends Zombie {
             v.push(kb.x, kb.y + 0.3, kb.z);
         }
         this.level().explode((Entity)this, this.getX(), this.getY() + 0.5, this.getZ(), 4.0f, Level.ExplosionInteraction.TNT);
-        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), (Holder)SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.5f, 0.8f);
+        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.5f, 0.8f);
         sl.sendParticles((ParticleOptions)ParticleTypes.EXPLOSION_EMITTER, this.getX(), this.getY() + 0.5, this.getZ(), 2, 0.0, 0.0, 0.0, 0.0);
         this.discard();
     }
@@ -224,6 +197,41 @@ extends Zombie {
         super.readAdditionalSaveData(tag);
         this.fuseTimer = tag.getInt("Fuse");
         this.lifetimeTicks = tag.getInt("Life");
+    }
+
+    static class FlyingHomingGoal extends Goal {
+        private final YamaChildEntity entity;
+        private final double speed;
+
+        public FlyingHomingGoal(YamaChildEntity entity, double speed) {
+            this.entity = entity;
+            this.speed = speed;
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.entity.getTarget() != null && this.entity.getTarget().isAlive();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.canUse();
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity target = this.entity.getTarget();
+            if (target == null) return;
+            this.entity.getNavigation().stop();
+            Vec3 aim = target.getBoundingBox().getCenter().subtract(this.entity.position());
+            double dist = aim.length();
+            if (dist > 0.5) {
+                Vec3 move = aim.normalize().scale(this.speed);
+                this.entity.setDeltaMovement(this.entity.getDeltaMovement().scale(0.8).add(move.scale(0.2)));
+            }
+            this.entity.lookAt(target, 30, 30);
+        }
     }
 }
 
