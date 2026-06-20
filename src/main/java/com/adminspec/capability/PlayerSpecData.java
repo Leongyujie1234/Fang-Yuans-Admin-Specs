@@ -44,6 +44,9 @@ implements INBTSerializable<CompoundTag> {
     private static final int DRAGON_BREATH_COOLDOWN_TICKS = 200;
     private List<ItemStack> dragonSavedInventory = new ArrayList<ItemStack>();
     private int yamaChildrenCooldown = 0;
+    // Transient: set each tick by DragonFlightInputPayload from client
+    private boolean dragonJumping = false;
+    private boolean dragonSneaking = false;
 
     public String getSpecId() {
         return this.currentSpecId;
@@ -164,6 +167,22 @@ implements INBTSerializable<CompoundTag> {
 
     public void setYamaChildrenCooldown(int v) {
         this.yamaChildrenCooldown = Math.max(0, v);
+    }
+
+    public boolean isDragonJumping() {
+        return this.dragonJumping;
+    }
+
+    public void setDragonJumping(boolean v) {
+        this.dragonJumping = v;
+    }
+
+    public boolean isDragonSneaking() {
+        return this.dragonSneaking;
+    }
+
+    public void setDragonSneaking(boolean v) {
+        this.dragonSneaking = v;
     }
 
     public void startSwordEscape(Vec3 dir, Vec3 start, Vec3 end, int durationTicks) {

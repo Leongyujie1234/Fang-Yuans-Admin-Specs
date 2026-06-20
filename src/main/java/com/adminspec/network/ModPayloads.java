@@ -12,6 +12,7 @@ package com.adminspec.network;
 
 import com.adminspec.network.ActivateMovePayload;
 import com.adminspec.network.DragonBreathPayload;
+import com.adminspec.network.DragonFlightInputPayload;
 import com.adminspec.network.DragonFormPayload;
 import com.adminspec.network.SpecStatePayload;
 import com.adminspec.network.SwordEscapeBeamPayload;
@@ -30,6 +31,7 @@ public final class ModPayloads {
         PayloadRegistrar reg = event.registrar("7");
         reg.playToServer(ActivateMovePayload.TYPE, ActivateMovePayload.STREAM_CODEC, ActivateMovePayload::handle);
         reg.playToServer(DragonBreathPayload.TYPE, DragonBreathPayload.STREAM_CODEC, DragonBreathPayload::handle);
+        reg.playToServer(DragonFlightInputPayload.TYPE, DragonFlightInputPayload.STREAM_CODEC, DragonFlightInputPayload::handle);
         reg.playToClient(SwordEscapeBeamPayload.TYPE, SwordEscapeBeamPayload.STREAM_CODEC, SwordEscapeBeamPayload::handle);
         reg.playToClient(SpecStatePayload.TYPE, SpecStatePayload.STREAM_CODEC, SpecStatePayload::handle);
         reg.playToClient(DragonFormPayload.TYPE, DragonFormPayload.STREAM_CODEC, DragonFormPayload::handle);

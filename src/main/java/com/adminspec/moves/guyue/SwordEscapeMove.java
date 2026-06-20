@@ -77,7 +77,7 @@ extends SpecMove {
     private static final int COOLDOWN_TICKS = 100;
     private static final int INVULN_TICKS = 10;
     private static final double DASH_DISTANCE = 12.0;
-    private static final int DASH_DURATION_TICKS = 2;
+    private static final int DASH_DURATION_TICKS = 10;
     private static final float DAMAGE = 2.0f;
     private static final DustParticleOptions BLOOD_PARTICLE = new DustParticleOptions(new Vector3f(0.75f, 0.0f, 0.0f), 2.0f);
 
@@ -131,7 +131,7 @@ extends SpecMove {
                 sl.sendParticles((ParticleOptions)ParticleTypes.END_ROD, pos.x, pos.y, pos.z, 3, 0.1, 0.15, 0.1, 0.04);
             }
         }
-        data.startSwordEscape(look, start, actualEnd, 2);
+        data.startSwordEscape(look, start, actualEnd, 10);
         data.setSwordEscapeCooldown(100);
         player.setInvisible(true);
         player.setInvulnerable(true);
@@ -172,8 +172,8 @@ extends SpecMove {
         player.setInvisible(true);
         float progressPrev = (float)(total - (remaining + 1)) / (float)total;
         float progressCur = (float)(total - remaining) / (float)total;
-        float easedPrev = SwordEscapeMove.smoothstep(progressPrev);
-        float easedCur = SwordEscapeMove.smoothstep(progressCur);
+        float easedPrev = SwordEscapeMove.easeOut(progressPrev);
+        float easedCur = SwordEscapeMove.easeOut(progressCur);
         Vec3 prevPos = SwordEscapeMove.lerp(start, end, easedPrev);
         Vec3 curPos = SwordEscapeMove.lerp(start, end, easedCur);
         if (player instanceof ServerPlayer) {
@@ -186,7 +186,7 @@ extends SpecMove {
         player.hurtMarked = true;
         if (hasSword && damage > 0.0f) {
             AABB segBox = new AABB(prevPos, curPos).inflate(1.0, 1.5, 1.0);
-            List victims = sl.getEntitiesOfClass(LivingEntity.class, segBox, e -> e.isAlive() && !e.equals((Object)player));
+            List<LivingEntity> victims = sl.getEntitiesOfClass(LivingEntity.class, segBox, e -> e.isAlive() && !e.equals(player));
             for (LivingEntity v : victims) {
                 float healthBefore = v.getHealth();
                 v.hurt(sl.damageSources().playerAttack(player), damage);
@@ -198,14 +198,15 @@ extends SpecMove {
         data.tickSwordEscape();
     }
 
-    private static float smoothstep(float t) {
+    private static float easeOut(float t) {
         if (t <= 0.0f) {
             return 0.0f;
         }
         if (t >= 1.0f) {
             return 1.0f;
         }
-        return t * t * (3.0f - 2.0f * t);
+        float f = 1.0f - t;
+        return 1.0f - f * f * f;
     }
 
     private static Vec3 lerp(Vec3 a, Vec3 b, float t) {
@@ -276,7 +277,7 @@ extends SpecMove {
             ItemStack head = new ItemStack((ItemLike)Items.PLAYER_HEAD);
             try {
                 ResolvableProfile profile = new ResolvableProfile(p.getGameProfile());
-                head.set(DataComponents.PROFILE, (Object)profile);
+                head.set(DataComponents.PROFILE, profile);
             }
             catch (Throwable throwable) {
                 // empty catch block

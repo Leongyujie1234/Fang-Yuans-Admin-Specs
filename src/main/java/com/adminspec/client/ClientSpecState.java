@@ -9,12 +9,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class ClientSpecState {
     private static final ConcurrentHashMap<UUID, Snapshot> STATES = new ConcurrentHashMap();
+    public static int clientFlashTicks = 0;
 
     private ClientSpecState() {
     }
 
     public static void update(SpecStatePayload payload) {
-        STATES.put(payload.playerId(), new Snapshot(payload.reverseFlowActive(), payload.reverseFlowCapacity(), payload.dragonFormActive()));
+        STATES.put(payload.playerId(), new Snapshot(payload.reverseFlowActive(), payload.reverseFlowCapacity(), payload.dragonFormActive(), payload.dragonFormTicks()));
     }
 
     public static Snapshot get(PlayerLike player) {
@@ -29,12 +30,14 @@ public final class ClientSpecState {
         public boolean reverseFlowActive;
         public float reverseFlowCapacity;
         public boolean dragonFormActive;
+        public int dragonFormTicks;
         public long lastUpdate;
 
-        public Snapshot(boolean active, float cap, boolean dragon) {
+        public Snapshot(boolean active, float cap, boolean dragon, int dragonTicks) {
             this.reverseFlowActive = active;
             this.reverseFlowCapacity = cap;
             this.dragonFormActive = dragon;
+            this.dragonFormTicks = dragonTicks;
             this.lastUpdate = System.currentTimeMillis();
         }
     }

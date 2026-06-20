@@ -4,7 +4,7 @@
 package com.adminspec.spec;
 
 import com.adminspec.spec.Spec;
-import com.adminspec.spec.guyue.GuYueFangYuanSpec;
+import com.adminspec.spec.guyue.LiuGuanYiSpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +34,7 @@ public final class SpecRegistry {
     }
 
     public static void registerDefaults() {
-        GuYueFangYuanSpec.register();
+        LiuGuanYiSpec.register();
     }
 }
 

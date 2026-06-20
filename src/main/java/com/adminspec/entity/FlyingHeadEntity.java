@@ -58,18 +58,18 @@ extends Entity {
 
     public void init(Vec3 neckPos, ItemStack headItem, Vec3 dashDir) {
         this.setPos(neckPos.x, neckPos.y, neckPos.z);
-        this.entityData.set(HEAD_ITEM, (Object)headItem);
-        this.entityData.set(NECK_X, (Object)Float.valueOf((float)neckPos.x));
-        this.entityData.set(NECK_Y, (Object)Float.valueOf((float)neckPos.y));
-        this.entityData.set(NECK_Z, (Object)Float.valueOf((float)neckPos.z));
+        this.entityData.set(HEAD_ITEM, headItem);
+        this.entityData.set(NECK_X, (float)neckPos.x);
+        this.entityData.set(NECK_Y, (float)neckPos.y);
+        this.entityData.set(NECK_Z, (float)neckPos.z);
         this.setDeltaMovement(dashDir.scale(0.25).add(0.0, 0.55, 0.0));
     }
 
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(HEAD_ITEM, (Object)ItemStack.EMPTY);
-        builder.define(NECK_X, (Object)Float.valueOf(0.0f));
-        builder.define(NECK_Y, (Object)Float.valueOf(0.0f));
-        builder.define(NECK_Z, (Object)Float.valueOf(0.0f));
+        builder.define(HEAD_ITEM, ItemStack.EMPTY);
+        builder.define(NECK_X, 0.0f);
+        builder.define(NECK_Y, 0.0f);
+        builder.define(NECK_Z, 0.0f);
     }
 
     public ItemStack getHeadItem() {
@@ -128,16 +128,16 @@ extends Entity {
 
     protected void readAdditionalSaveData(CompoundTag tag) {
         if (tag.contains("HeadItem")) {
-            this.entityData.set(HEAD_ITEM, (Object)ItemStack.parseOptional((HolderLookup.Provider)this.level().registryAccess(), (CompoundTag)tag.getCompound("HeadItem")));
+            this.entityData.set(HEAD_ITEM, ItemStack.parseOptional(this.level().registryAccess(), tag.getCompound("HeadItem")));
         }
         if (tag.contains("NeckX")) {
-            this.entityData.set(NECK_X, (Object)Float.valueOf(tag.getFloat("NeckX")));
+            this.entityData.set(NECK_X, tag.getFloat("NeckX"));
         }
         if (tag.contains("NeckY")) {
-            this.entityData.set(NECK_Y, (Object)Float.valueOf(tag.getFloat("NeckY")));
+            this.entityData.set(NECK_Y, tag.getFloat("NeckY"));
         }
         if (tag.contains("NeckZ")) {
-            this.entityData.set(NECK_Z, (Object)Float.valueOf(tag.getFloat("NeckZ")));
+            this.entityData.set(NECK_Z, tag.getFloat("NeckZ"));
         }
         this.lifetimeTicks = tag.getInt("Life");
         this.bloodTimer = tag.getInt("Blood");

@@ -65,7 +65,7 @@ implements INBTSerializable<CompoundTag> {
                 entry.putLong("Pos", pos.asLong());
                 entry.putLong("Due", dueTick);
                 try {
-                    Tag stateTag = BlockState.CODEC.encodeStart((DynamicOps)NbtOps.INSTANCE, (Object)state).result().orElse(null);
+                    Tag stateTag = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, state).result().orElse(null);
                     if (stateTag == null) break block6;
                     entry.put("State", stateTag);
                 }
@@ -109,7 +109,7 @@ implements INBTSerializable<CompoundTag> {
         }
         if (entry.contains("State")) {
             try {
-                BlockState state = BlockState.CODEC.parse((DynamicOps)NbtOps.INSTANCE, (Object)entry.get("State")).result().orElse(null);
+                BlockState state = BlockState.CODEC.parse(NbtOps.INSTANCE, entry.get("State")).result().orElse(null);
                 if (state != null) {
                     BlockEntity be;
                     level.setBlock(pos, state, 3);
@@ -133,7 +133,7 @@ implements INBTSerializable<CompoundTag> {
         CompoundTag root = new CompoundTag();
         ListTag list = new ListTag();
         for (Entry e : this.pending) {
-            list.add((Object)e.tag);
+            list.add(e.tag);
         }
         root.put("Pending", (Tag)list);
         return root;

@@ -1,9 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  net.minecraft.network.chat.Component
- */
 package com.adminspec.spec.guyue;
 
 import com.adminspec.moves.guyue.AncientSwordDragonTransformationMove;
@@ -15,10 +9,10 @@ import com.adminspec.spec.SpecRegistry;
 import java.util.List;
 import net.minecraft.network.chat.Component;
 
-public final class GuYueFangYuanSpec {
-    public static final String ID = "gu_yue_fang_yuan";
+public final class LiuGuanYiSpec {
+    public static final String ID = "liu_guan_yi";
 
-    private GuYueFangYuanSpec() {
+    private LiuGuanYiSpec() {
     }
 
     public static void register() {
@@ -26,4 +20,3 @@ public final class GuYueFangYuanSpec {
         SpecRegistry.register(spec);
     }
 }
-

@@ -1,23 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  net.minecraft.core.particles.ParticleOptions
- *  net.minecraft.core.particles.ParticleTypes
- *  net.minecraft.network.chat.Component
- *  net.minecraft.network.protocol.common.custom.CustomPacketPayload
- *  net.minecraft.server.level.ServerLevel
- *  net.minecraft.server.level.ServerPlayer
- *  net.minecraft.world.entity.LivingEntity
- *  net.minecraft.world.entity.ai.attributes.AttributeInstance
- *  net.minecraft.world.entity.ai.attributes.Attributes
- *  net.minecraft.world.entity.player.Player
- *  net.minecraft.world.item.ItemStack
- *  net.minecraft.world.level.GameType
- *  net.minecraft.world.phys.AABB
- *  net.minecraft.world.phys.Vec3
- *  net.neoforged.neoforge.network.PacketDistributor
- */
 package com.adminspec.moves.guyue;
 
 import com.adminspec.capability.PlayerSpecCapability;
@@ -49,8 +29,6 @@ extends SpecMove {
     private static final double FLIGHT_ACCEL = 0.15;
     private static final double FLIGHT_MAX_SPEED = 1.5;
     private static final double FLIGHT_FRICTION = 0.88;
-    private static final double ASCEND_SPEED = 0.6;
-    private static final double DESCEND_SPEED = 0.6;
     private static final float BREATH_DAMAGE = 4.0f;
     private static final double BREATH_RANGE = 16.0;
     private static final int BREATH_DURATION_TICKS = 200;
@@ -60,7 +38,7 @@ extends SpecMove {
     private static final double ARMOR_TOUGHNESS_BOOST = 4.0;
 
     public AncientSwordDragonTransformationMove() {
-        super(ID, (Component)Component.literal((String)"Ancient Sword Dragon Transformation"), (Component)Component.literal((String)"Transform into the Ancient Sword Dragon. Custom flight system (Invincible-style). M1 breathes sword qi. 5-minute duration. Inventory cleared + restored on detransform."));
+        super(ID, (Component)Component.literal("Ancient Sword Dragon Transformation"), (Component)Component.literal("Transform into the Ancient Sword Dragon. Custom flight system (velocity-based). M1 breathes sword qi. 5-minute duration. Inventory cleared + restored on detransform."));
     }
 
     @Override
@@ -102,13 +80,59 @@ extends SpecMove {
         }
         data.incrementDragonFormTicks();
         if (data.getDragonFormTicks() >= PlayerSpecData.getDragonFormMaxDuration()) {
-            sp.sendSystemMessage((Component)Component.literal((String)"\u00a76[Ancient Sword Dragon] \u00a7cTime has expired. Detransforming."));
+            sp.sendSystemMessage((Component)Component.literal("\u00a76[Ancient Sword Dragon] \u00a7cTime has expired. Detransforming."));
             this.detransform(sp, data);
             return;
         }
+
+        // Custom Flight System Physics:
         sp.setNoGravity(true);
-        sp.getAbilities().mayfly = true;
+        sp.getAbilities().mayfly = false;
+        sp.getAbilities().flying = false;
         sp.onUpdateAbilities();
+
+        Vec3 look = sp.getLookAngle();
+        Vec3 moveDir = Vec3.ZERO;
+
+        float forward = sp.zza;
+        float strafe = sp.xxa;
+
+        if (forward > 0.0f) {
+            moveDir = moveDir.add(look);
+        } else if (forward < 0.0f) {
+            moveDir = moveDir.subtract(look);
+        }
+
+        if (strafe != 0.0f) {
+            Vec3 right = look.cross(new Vec3(0, 1, 0)).normalize();
+            if (strafe > 0.0f) {
+                moveDir = moveDir.subtract(right);
+            } else {
+                moveDir = moveDir.add(right);
+            }
+        }
+
+        if (data.isDragonJumping()) {
+            moveDir = moveDir.add(new Vec3(0, 0.6, 0));
+        } else if (data.isDragonSneaking()) {
+            moveDir = moveDir.subtract(new Vec3(0, 0.6, 0));
+        }
+
+        Vec3 velocity = sp.getDeltaMovement();
+        if (moveDir.lengthSqr() > 1.0E-6) {
+            moveDir = moveDir.normalize().scale(FLIGHT_ACCEL);
+            velocity = velocity.add(moveDir);
+        }
+
+        velocity = new Vec3(velocity.x * FLIGHT_FRICTION, velocity.y * FLIGHT_FRICTION, velocity.z * FLIGHT_FRICTION);
+
+        double speed = velocity.length();
+        if (speed > FLIGHT_MAX_SPEED) {
+            velocity = velocity.scale(FLIGHT_MAX_SPEED / speed);
+        }
+
+        sp.setDeltaMovement(velocity);
+        sp.hurtMarked = true;
     }
 
     private void transform(ServerPlayer player, PlayerSpecData data) {
@@ -136,15 +160,17 @@ extends SpecMove {
             // empty catch block
         }
         player.setNoGravity(true);
-        player.getAbilities().mayfly = true;
-        player.getAbilities().flying = true;
+        player.getAbilities().mayfly = false;
+        player.getAbilities().flying = false;
         player.onUpdateAbilities();
+        player.setDeltaMovement(new Vec3(0.0, 1.2, 0.0));
+        player.hurtMarked = true;
         data.setDragonFormActive(true);
         data.setDragonFormTicks(0);
         data.setDragonBreathCooldown(0);
         PacketDistributor.sendToPlayer((ServerPlayer)player, (CustomPacketPayload)new DragonFormPayload(true), (CustomPacketPayload[])new CustomPacketPayload[0]);
         com.adminspec.network.SpecStatePayload.broadcast(player);
-        player.sendSystemMessage((Component)Component.literal((String)"\u00a76\u00a7l[Ancient Sword Dragon] \u00a7r\u00a7eYou have transformed into the Ancient Sword Dragon! WASD to fly, Space to ascend, Shift to descend. M1 to breathe sword qi. 5 minutes until forced detransform."));
+        player.sendSystemMessage((Component)Component.literal("\u00a76\u00a7l[Ancient Sword Dragon] \u00a7r\u00a7eYou have transformed into the Ancient Sword Dragon! WASD to fly, Space to ascend, Shift to descend. M1 to breathe sword qi. 5 minutes until forced detransform."));
     }
 
     private void detransform(ServerPlayer player, PlayerSpecData data) {
@@ -181,7 +207,7 @@ extends SpecMove {
         data.setDragonFormTicks(0);
         PacketDistributor.sendToPlayer((ServerPlayer)player, (CustomPacketPayload)new DragonFormPayload(false), (CustomPacketPayload[])new CustomPacketPayload[0]);
         com.adminspec.network.SpecStatePayload.broadcast(player);
-        player.sendSystemMessage((Component)Component.literal((String)"\u00a76[Ancient Sword Dragon] \u00a77Transformed back to human form."));
+        player.sendSystemMessage((Component)Component.literal("\u00a76[Ancient Sword Dragon] \u00a77Transformed back to human form."));
     }
 
     public static void handleBreath(ServerPlayer player) {
@@ -196,23 +222,26 @@ extends SpecMove {
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getLookAngle();
         Vec3 start = eye.add(look.scale(1.0));
+        
+        // Spawn sword qi particles
         for (double d = 0.0; d < 16.0; d += 0.5) {
             Vec3 pos = start.add(look.scale(d));
-            sl.sendParticles(player, (ParticleOptions)ParticleTypes.END_ROD, true, pos.x, pos.y, pos.z, 4, 0.05, 0.05, 0.05, 0.03);
+            sl.sendParticles(player, (ParticleOptions)ParticleTypes.SWEEP_ATTACK, true, pos.x, pos.y, pos.z, 2, 0.1, 0.1, 0.1, 0.05);
             sl.sendParticles(player, (ParticleOptions)ParticleTypes.CRIT, true, pos.x, pos.y, pos.z, 3, 0.08, 0.08, 0.08, 0.05);
-            sl.sendParticles((ParticleOptions)ParticleTypes.END_ROD, pos.x, pos.y, pos.z, 3, 0.05, 0.05, 0.05, 0.02);
+            sl.sendParticles((ParticleOptions)ParticleTypes.SWEEP_ATTACK, pos.x, pos.y, pos.z, 1, 0.1, 0.1, 0.1, 0.05);
             sl.sendParticles((ParticleOptions)ParticleTypes.CRIT, pos.x, pos.y, pos.z, 2, 0.08, 0.08, 0.08, 0.05);
         }
+        
         AABB beamBox = player.getBoundingBox().expandTowards(look.scale(16.0)).inflate(1.0);
-        List victims = sl.getEntitiesOfClass(LivingEntity.class, beamBox, e -> e.isAlive() && !e.equals((Object)player));
+        List<LivingEntity> victims = sl.getEntitiesOfClass(LivingEntity.class, beamBox, e -> e.isAlive() && !e.equals(player));
         for (LivingEntity v : victims) {
             Vec3 toVictim = v.position().subtract(eye);
             double projection = toVictim.dot(look);
             if (projection < 0.0 || projection > 16.0) continue;
             Vec3 closestPoint = eye.add(look.scale(projection));
             if (!(v.position().distanceTo(closestPoint) < 1.5)) continue;
-            v.hurt(sl.damageSources().playerAttack((Player)player), 4.0f);
+            v.hurt(sl.damageSources().playerAttack((Player)player), 6.0f);
         }
+        data.setDragonBreathCooldown(60); // 3 seconds cooldown
     }
 }
-

@@ -58,6 +58,7 @@ public class AdminSpecMod {
         NeoForge.EVENT_BUS.addListener(PlayerSpecCapability::onPlayerClone);
         NeoForge.EVENT_BUS.addListener(PlayerSpecCapability::onPlayerRespawn);
         NeoForge.EVENT_BUS.addListener(PlayerSpecCapability::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(PlayerSpecCapability::onPlayerStartTracking);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

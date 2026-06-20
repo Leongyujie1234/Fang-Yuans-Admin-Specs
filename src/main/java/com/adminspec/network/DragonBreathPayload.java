@@ -25,7 +25,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record DragonBreathPayload() implements CustomPacketPayload
 {
     public static final CustomPacketPayload.Type<DragonBreathPayload> TYPE = new CustomPacketPayload.Type(ResourceLocation.fromNamespaceAndPath((String)"adminspec", (String)"dragon_breath"));
-    public static final StreamCodec<FriendlyByteBuf, DragonBreathPayload> STREAM_CODEC = StreamCodec.unit((Object)new DragonBreathPayload());
+    public static final StreamCodec<FriendlyByteBuf, DragonBreathPayload> STREAM_CODEC = StreamCodec.unit(new DragonBreathPayload());
 
     public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return TYPE;

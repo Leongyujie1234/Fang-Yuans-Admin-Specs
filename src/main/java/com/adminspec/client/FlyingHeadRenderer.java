@@ -39,7 +39,7 @@ extends EntityRenderer<FlyingHeadEntity> {
     }
 
     public void render(FlyingHeadEntity entity, float yaw, float partialTicks, PoseStack pose, MultiBufferSource buffers, int packedLight) {
-        super.render((Entity)entity, yaw, partialTicks, pose, buffers, packedLight);
+        super.render(entity, yaw, partialTicks, pose, buffers, packedLight);
         ItemStack headItem = entity.getHeadItem();
         if (headItem.isEmpty()) {
             return;

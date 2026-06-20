@@ -1,21 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  net.minecraft.core.UUIDUtil
- *  net.minecraft.network.FriendlyByteBuf
- *  net.minecraft.network.codec.ByteBufCodecs
- *  net.minecraft.network.codec.StreamCodec
- *  net.minecraft.network.protocol.common.custom.CustomPacketPayload
- *  net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type
- *  net.minecraft.resources.ResourceLocation
- *  net.minecraft.server.level.ServerPlayer
- *  net.minecraft.world.entity.Entity
- *  net.minecraft.world.entity.player.Player
- *  net.neoforged.fml.loading.FMLEnvironment
- *  net.neoforged.neoforge.network.PacketDistributor
- *  net.neoforged.neoforge.network.handling.IPayloadContext
- */
 package com.adminspec.network;
 
 import com.adminspec.capability.PlayerSpecCapability;
@@ -35,10 +17,17 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record SpecStatePayload(UUID playerId, boolean reverseFlowActive, float reverseFlowCapacity, boolean dragonFormActive) implements CustomPacketPayload
+public record SpecStatePayload(UUID playerId, boolean reverseFlowActive, float reverseFlowCapacity, boolean dragonFormActive, int dragonFormTicks) implements CustomPacketPayload
 {
     public static final CustomPacketPayload.Type<SpecStatePayload> TYPE = new CustomPacketPayload.Type(ResourceLocation.fromNamespaceAndPath((String)"adminspec", (String)"spec_state"));
-    public static final StreamCodec<FriendlyByteBuf, SpecStatePayload> STREAM_CODEC = StreamCodec.composite((StreamCodec)UUIDUtil.STREAM_CODEC, SpecStatePayload::playerId, (StreamCodec)ByteBufCodecs.BOOL, SpecStatePayload::reverseFlowActive, (StreamCodec)ByteBufCodecs.FLOAT, SpecStatePayload::reverseFlowCapacity, (StreamCodec)ByteBufCodecs.BOOL, SpecStatePayload::dragonFormActive, SpecStatePayload::new);
+    public static final StreamCodec<FriendlyByteBuf, SpecStatePayload> STREAM_CODEC = StreamCodec.composite(
+        UUIDUtil.STREAM_CODEC, SpecStatePayload::playerId,
+        ByteBufCodecs.BOOL, SpecStatePayload::reverseFlowActive,
+        ByteBufCodecs.FLOAT, SpecStatePayload::reverseFlowCapacity,
+        ByteBufCodecs.BOOL, SpecStatePayload::dragonFormActive,
+        ByteBufCodecs.VAR_INT, SpecStatePayload::dragonFormTicks,
+        SpecStatePayload::new
+    );
 
     public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return TYPE;
@@ -57,7 +46,6 @@ public record SpecStatePayload(UUID playerId, boolean reverseFlowActive, float r
         }
         ServerPlayer sp = (ServerPlayer)player;
         PlayerSpecData data = PlayerSpecCapability.get(player);
-        PacketDistributor.sendToPlayersTrackingEntityAndSelf((Entity)sp, (CustomPacketPayload)new SpecStatePayload(player.getUUID(), data.isReverseFlowActive(), data.getReverseFlowCapacity(), data.isDragonFormActive()), (CustomPacketPayload[])new CustomPacketPayload[0]);
+        PacketDistributor.sendToPlayersTrackingEntityAndSelf((Entity)sp, (CustomPacketPayload)new SpecStatePayload(player.getUUID(), data.isReverseFlowActive(), data.getReverseFlowCapacity(), data.isDragonFormActive(), data.getDragonFormTicks()), (CustomPacketPayload[])new CustomPacketPayload[0]);
     }
 }
-

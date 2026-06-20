@@ -89,7 +89,7 @@ extends Zombie {
     }
 
     public void setOwner(Player owner) {
-        this.entityData.set(OWNER_ID, (Object)(owner == null ? -1 : owner.getId()));
+        this.entityData.set(OWNER_ID, owner == null ? -1 : owner.getId());
     }
 
     public Player getOwnerPlayer() {
@@ -104,8 +104,8 @@ extends Zombie {
 
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(OWNER_ID, (Object)-1);
-        builder.define(FUSE_LIT, (Object)false);
+        builder.define(OWNER_ID, -1);
+        builder.define(FUSE_LIT, false);
     }
 
     public static AttributeSupplier.Builder createYamaAttributes() {
@@ -116,7 +116,7 @@ extends Zombie {
         this.goalSelector.addGoal(0, (Goal)new FloatGoal((Mob)this));
         this.goalSelector.addGoal(1, (Goal)new MeleeAttackGoal((PathfinderMob)this, 1.5, true));
         this.goalSelector.addGoal(5, (Goal)new WaterAvoidingRandomStrollGoal((PathfinderMob)this, 1.0));
-        this.targetSelector.addGoal(1, (Goal)new NearestAttackableTargetGoal((Mob)this, LivingEntity.class, 10, true, false, e -> !(e instanceof YamaChildEntity) && !e.equals((Object)this.getOwnerPlayer()) && e.isAlive()));
+        this.targetSelector.addGoal(1, (Goal)new NearestAttackableTargetGoal((Mob)this, LivingEntity.class, 10, true, false, (java.util.function.Predicate<LivingEntity>)(e -> !(e instanceof YamaChildEntity) && !e.equals(this.getOwnerPlayer()) && e.isAlive())));
     }
 
     protected boolean isSunBurnTick() {
@@ -132,7 +132,7 @@ extends Zombie {
         }
         if (this.fuseTimer > 0) {
             --this.fuseTimer;
-            this.entityData.set(FUSE_LIT, (Object)true);
+            this.entityData.set(FUSE_LIT, true);
             if (this.level().isClientSide && this.random.nextFloat() < 0.4f) {
                 this.level().addParticle((ParticleOptions)ParticleTypes.SMOKE, this.getX() + (this.random.nextDouble() - 0.5) * 0.4, this.getY() + this.random.nextDouble() * 1.0, this.getZ() + (this.random.nextDouble() - 0.5) * 0.4, 0.0, 0.1, 0.0);
             }
@@ -174,7 +174,7 @@ extends Zombie {
             mgr.snapshotAndSchedule(sl, positions, sl.getGameTime());
         }
         AABB box = AABB.ofSize((Vec3)this.position(), (double)8.0, (double)8.0, (double)8.0);
-        List victims = sl.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && !e.equals((Object)this) && !e.equals((Object)owner));
+        List<LivingEntity> victims = sl.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && !e.equals(this) && !e.equals(owner));
         for (LivingEntity v : victims) {
             double dist = v.position().distanceTo(this.position());
             double falloff = Math.max(0.0, 1.0 - dist / 4.0);

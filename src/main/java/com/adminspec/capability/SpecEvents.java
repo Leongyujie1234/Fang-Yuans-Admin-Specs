@@ -163,5 +163,38 @@ public final class SpecEvents {
         }
         SpecStatePayload.broadcast(player);
     }
+
+    @SubscribeEvent
+    public static void onLeftClickBlock(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock event) {
+        Player player = event.getEntity();
+        if (player != null) {
+            PlayerSpecData data = PlayerSpecCapability.get(player);
+            if (data.isDragonFormActive()) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRightClickBlock(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        Player player = event.getEntity();
+        if (player != null) {
+            PlayerSpecData data = PlayerSpecCapability.get(player);
+            if (data.isDragonFormActive()) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRightClickItem(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickItem event) {
+        Player player = event.getEntity();
+        if (player != null) {
+            PlayerSpecData data = PlayerSpecCapability.get(player);
+            if (data.isDragonFormActive()) {
+                event.setCanceled(true);
+            }
+        }
+    }
 }
 

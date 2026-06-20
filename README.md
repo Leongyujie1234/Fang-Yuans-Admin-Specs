@@ -36,10 +36,10 @@ All commands require **operator permission level 2**.
 | `/admin spec clear`                       | Remove your currently active spec.                |
 | `/admin spec list`                        | List all registered spec ids.                     |
 
-**First spec id:** `gu_yue_fang_yuan`
+**First spec id:** `liu_guan_yi`
 
 ```
-/admin spec set gu_yue_fang_yuan
+/admin spec set liu_guan_yi
 ```
 
 ---
@@ -143,7 +143,7 @@ src/main/java/com/adminspec/
 │   ├── SpecRegistry.java
 │   ├── MoveContext.java
 │   └── guyue/
-│       └── GuYueFangYuanSpec.java   - registers the 4 moves into a Spec
+│       └── LiuGuanYiSpec.java       - registers the 4 moves into a Spec
 └── client/
     ├── ClientSetup.java             - keybinds + renderer registration
     ├── ClientKeyHandler.java        - keybind -> ActivateMovePayload

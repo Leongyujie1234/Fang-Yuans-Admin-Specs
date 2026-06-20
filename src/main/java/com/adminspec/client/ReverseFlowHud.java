@@ -53,6 +53,12 @@ implements LayeredDraw.Layer {
     }
 
     public void render(GuiGraphics gfx, DeltaTracker delta) {
+        if (ClientSpecState.clientFlashTicks > 0) {
+            float alpha = (float)ClientSpecState.clientFlashTicks / 15.0f;
+            int a = (int)(alpha * 255.0f);
+            int color = (a << 24) | 0xFFFFFF;
+            gfx.fill(0, 0, gfx.guiWidth(), gfx.guiHeight(), color);
+        }
         int fillColor;
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
