@@ -163,10 +163,11 @@ public class AncientSwordDragonTransformationMove extends SpecMove {
         data.setDragonSavedInventory(saved);
         player.getInventory().clearContent();
 
-        // Attribute boosts
+        // Attribute boosts: ARMOR and ARMOR_TOUGHNESS make the dragon form tankier.
+        // (We intentionally do NOT change MOVEMENT_SPEED — its base for players is ~0.7,
+        //  so setting 0.15 would slow the player on foot, and flight uses raw
+        //  setDeltaMovement anyway, so it has no effect on the actual flight feel.)
         try {
-            AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (speed != null) speed.setBaseValue(0.15);
             AttributeInstance armor = player.getAttribute(Attributes.ARMOR);
             if (armor != null) armor.setBaseValue(20.0);
             AttributeInstance toughness = player.getAttribute(Attributes.ARMOR_TOUGHNESS);
@@ -208,8 +209,6 @@ public class AncientSwordDragonTransformationMove extends SpecMove {
 
         // Restore attributes
         try {
-            AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (speed != null) speed.setBaseValue(0.1);
             AttributeInstance armor = player.getAttribute(Attributes.ARMOR);
             if (armor != null) armor.setBaseValue(0.0);
             AttributeInstance toughness = player.getAttribute(Attributes.ARMOR_TOUGHNESS);

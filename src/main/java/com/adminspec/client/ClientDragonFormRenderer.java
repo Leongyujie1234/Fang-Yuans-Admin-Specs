@@ -192,7 +192,12 @@ public final class ClientDragonFormRenderer {
             }
             pose.popPose();
         } else {
-            // Progressive mutation (0-60 ticks): don't cancel player render, overlay dragon parts
+            // Progressive mutation (0-60 ticks): don't cancel player render, overlay dragon parts.
+            // The actual geo skeleton is: root -> neck -> {upper_head, lower_head},
+            // and root -> front_body -> middle_body -> rear_body -> tail -> tail_fin.
+            // There are NO wing bones, so we phase the mutation as head / front-body / rear+tail.
+            // Bone pivots in Bedrock geo are model-space absolute, and renderBoneStandalone
+            // applies a net-zero pivot transform, so any subset of bones renders in place.
             pose.pushPose();
             float yaw = player.getViewYRot(pt);
             pose.mulPose(Axis.YP.rotationDegrees(-yaw - 180f));
@@ -201,32 +206,90 @@ public final class ClientDragonFormRenderer {
 
             float alpha = Math.min(1.0f, ticks / 30f); // fade in
 
-            // Phase 1 (ticks 5+): show neck/head
-            if (ticks >= 5) {
-                for (Bone b : dragonModel.bones) {
-                    if (b.name.equals("neck") || b.name.equals("head")) {
-                        renderBone(pose, consumer, b, childrenMap, light, 1f, 1f, 1f, alpha, pt, player);
-                    }
-                }
-            }
-            // Phase 2 (ticks 20+): body
-            if (ticks >= 20) {
-                for (Bone b : dragonModel.bones) {
-                    if (b.name.equals("front_body")) {
-                        renderBone(pose, consumer, b, childrenMap, light, 1f, 1f, 1f, alpha, pt, player);
-                    }
-                }
-            }
-            // Phase 3 (ticks 40+): wings + tail
-            if (ticks >= 40) {
-                for (Bone b : dragonModel.bones) {
-                    if (b.name.contains("wing") || b.name.contains("tail")) {
-                        renderBone(pose, consumer, b, childrenMap, light, 1f, 1f, 1f, alpha, pt, player);
-                    }
+            for (Bone b : dragonModel.bones) {
+                if (isActiveInPhase(b.name, ticks)) {
+                    renderBoneStandalone(pose, consumer, b, light, alpha, pt, player);
                 }
             }
             pose.popPose();
         }
+    }
+
+    /**
+     * Phase gating for the 0-60 tick mutation sequence, mapped to the real bones:
+     * ticks >= 5  -> head emerges (neck + upper/lower head)
+     * ticks >= 20 -> front + middle body grow
+     * ticks >= 40 -> rear body + tail + tail_fin complete the dragon
+     */
+    private static boolean isActiveInPhase(String name, int ticks) {
+        if (ticks >= 5 && (name.equals("neck") || name.equals("upper_head") || name.equals("lower_head"))) {
+            return true;
+        }
+        if (ticks >= 20 && (name.equals("front_body") || name.equals("middle_body"))) {
+            return true;
+        }
+        if (ticks >= 40 && (name.equals("rear_body") || name.equals("tail") || name.equals("tail_fin"))) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Draws a single bone's cubes (with its own pivot/rotation and per-bone animation)
+     * WITHOUT recursing into children. Used during the phased mutation so each phase
+     * can render an exact subset of bones (e.g. head without pulling in the whole body).
+     */
+    private static void renderBoneStandalone(
+        PoseStack pose, VertexConsumer consumer, Bone bone,
+        int light, float a, float partialTick, Player player
+    ) {
+        pose.pushPose();
+
+        float px = bone.pivot[0];
+        float py = bone.pivot[1];
+        float pz = bone.pivot[2];
+        pose.translate(px, py, pz);
+
+        float rx = bone.rotation[0];
+        float ry = bone.rotation[1];
+        float rz = bone.rotation[2];
+
+        long time = player.level().getGameTime();
+        if (bone.name.contains("tail")) {
+            ry += (float)(Math.sin(time * 0.12) * 12.0);
+        } else if (bone.name.contains("wing") || bone.name.contains("Wing")) {
+            rz += (float)(Math.sin(time * 0.2) * 20.0);
+        } else if (bone.name.contains("Hair") || bone.name.contains("Horn")) {
+            rz += (float)(Math.sin(time * 0.1) * 4.0);
+        }
+
+        if (rx != 0) pose.mulPose(Axis.XP.rotationDegrees(rx));
+        if (ry != 0) pose.mulPose(Axis.YP.rotationDegrees(ry));
+        if (rz != 0) pose.mulPose(Axis.ZP.rotationDegrees(rz));
+
+        pose.translate(-px, -py, -pz);
+
+        for (Cube cube : bone.cubes) {
+            pose.pushPose();
+            if (cube.pivot != null) {
+                pose.translate(cube.pivot[0], cube.pivot[1], cube.pivot[2]);
+                if (cube.rotation != null) {
+                    if (cube.rotation[0] != 0) pose.mulPose(Axis.XP.rotationDegrees(cube.rotation[0]));
+                    if (cube.rotation[1] != 0) pose.mulPose(Axis.YP.rotationDegrees(cube.rotation[1]));
+                    if (cube.rotation[2] != 0) pose.mulPose(Axis.ZP.rotationDegrees(cube.rotation[2]));
+                }
+                pose.translate(-cube.pivot[0], -cube.pivot[1], -cube.pivot[2]);
+            }
+            drawBox(pose.last(), consumer,
+                cube.origin[0], cube.origin[1], cube.origin[2],
+                cube.size[0], cube.size[1], cube.size[2],
+                cube.uv[0], cube.uv[1],
+                dragonModel.texW, dragonModel.texH,
+                light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, a);
+            pose.popPose();
+        }
+
+        pose.popPose();
     }
 
     private static void renderBone(

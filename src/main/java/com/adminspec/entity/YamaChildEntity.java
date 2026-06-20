@@ -109,7 +109,11 @@ extends Zombie {
     }
 
     public static AttributeSupplier.Builder createYamaAttributes() {
-        return Zombie.createAttributes().add(Attributes.MOVEMENT_SPEED, 0.35).add(Attributes.MAX_HEALTH, 6.0).add(Attributes.ATTACK_DAMAGE, 1.0);
+        return Zombie.createAttributes().add(Attributes.MOVEMENT_SPEED, 0.35).add(Attributes.MAX_HEALTH, 10.0).add(Attributes.ARMOR, 4.0).add(Attributes.ATTACK_DAMAGE, 1.0);
+    }
+
+    public boolean isFuseLit() {
+        return this.entityData.get(FUSE_LIT);
     }
 
     protected void registerGoals() {
@@ -130,6 +134,24 @@ extends Zombie {
             this.discard();
             return;
         }
+        // Flying behaviour: nullify gravity and hover so the child flies toward its target
+        // instead of walking. The spec calls these "flying baby zombies".
+        this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, 0.4, 1.0));
+        if (!this.isNoGravity()) {
+            this.setNoGravity(true);
+        }
+        LivingEntity target = this.getTarget();
+        if (target != null && target.isAlive()) {
+            // Steer toward target's body centre for a smooth flying intercept
+            Vec3 aim = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0)
+                .subtract(this.position().add(0.0, this.getBbHeight() * 0.5, 0.0));
+            double dist = aim.length();
+            if (dist > 0.1) {
+                double speed = 0.18; // blocks/tick (~3.6 b/s)
+                Vec3 push = aim.scale(speed / dist);
+                this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 0.6, 0.6).add(push));
+            }
+        }
         if (this.fuseTimer > 0) {
             --this.fuseTimer;
             this.entityData.set(FUSE_LIT, true);
@@ -140,7 +162,6 @@ extends Zombie {
                 this.detonate();
             }
         } else {
-            LivingEntity target = this.getTarget();
             if (target != null && this.distanceToSqr((Entity)target) < 6.25) {
                 this.fuseTimer = 20;
             }
