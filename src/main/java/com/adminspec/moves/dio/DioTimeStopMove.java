@@ -36,6 +36,11 @@ public class DioTimeStopMove extends SpecMove {
         if (!(player instanceof ServerPlayer sp)) return;
         DioStandState.ensureStand(sp);
         if (DioStandState.TIMESTOP_TICKS.getOrDefault(sp.getUUID(), 0) > 0) return;
+        int cd = DioStandState.TIMESTOP_CD.getOrDefault(sp.getUUID(), 0);
+        if (cd > 0) {
+            sp.sendSystemMessage(Component.literal("§5[The World] §7Time Stop cooldown: §f" + String.format("%.1f", cd / 20.0) + "s"));
+            return;
+        }
         TheWorldStandEntity stand = DioStandState.getStand(sp);
         if (stand != null) stand.playAnimation("animation.theworld.timestop");
 
@@ -53,6 +58,7 @@ public class DioTimeStopMove extends SpecMove {
         }
         DioStandState.FROZEN.put(sp.getUUID(), frozen);
         DioStandState.TIMESTOP_TICKS.put(sp.getUUID(), DURATION);
+        DioStandState.TIMESTOP_CD.put(sp.getUUID(), DioStandState.TIMESTOP_COOLDOWN);
 
         // Send gray overlay to caster only
         PacketDistributor.sendToPlayer(sp, new TimeStopVfxPayload(sp.getUUID(), true));
@@ -64,6 +70,8 @@ public class DioTimeStopMove extends SpecMove {
         if (player.level().isClientSide) return;
         if (!(player instanceof ServerPlayer sp)) return;
         UUID uuid = sp.getUUID();
+        int cd = DioStandState.TIMESTOP_CD.getOrDefault(uuid, 0);
+        if (cd > 0) DioStandState.TIMESTOP_CD.put(uuid, cd - 1);
         int ticks = DioStandState.TIMESTOP_TICKS.getOrDefault(uuid, 0);
         if (ticks <= 0) return;
 

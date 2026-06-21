@@ -31,9 +31,15 @@ public class DioBarrageMove extends SpecMove {
         if (!(player instanceof ServerPlayer sp)) return;
         DioStandState.ensureStand(sp);
         if (DioStandState.BARRAGE_TICKS.getOrDefault(sp.getUUID(), 0) > 0) return;
+        int cd = DioStandState.BARRAGE_CD.getOrDefault(sp.getUUID(), 0);
+        if (cd > 0) {
+            sp.sendSystemMessage(Component.literal("§e[Barrage] §7Cooldown: §f" + String.format("%.1f", cd / 20.0) + "s"));
+            return;
+        }
         TheWorldStandEntity stand = DioStandState.getStand(sp);
         if (stand != null) stand.playAnimation("animation.theworld.barrage");
         DioStandState.BARRAGE_TICKS.put(sp.getUUID(), DioStandState.BARRAGE_DURATION);
+        DioStandState.BARRAGE_CD.put(sp.getUUID(), DioStandState.BARRAGE_COOLDOWN);
         sp.sendSystemMessage(Component.literal("§e§lMUDA MUDA MUDA!"));
     }
 
@@ -42,6 +48,9 @@ public class DioBarrageMove extends SpecMove {
         if (player.level().isClientSide) return;
         if (!(player instanceof ServerPlayer sp)) return;
         UUID uuid = sp.getUUID();
+        // Tick cooldown
+        int cd = DioStandState.BARRAGE_CD.getOrDefault(uuid, 0);
+        if (cd > 0) DioStandState.BARRAGE_CD.put(uuid, cd - 1);
         int ticks = DioStandState.BARRAGE_TICKS.getOrDefault(uuid, 0);
         if (ticks <= 0) return;
 

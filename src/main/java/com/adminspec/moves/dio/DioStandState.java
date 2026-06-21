@@ -18,10 +18,20 @@ public final class DioStandState {
     public static final Map<UUID, Integer> CHARGE_TICKS = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> TIMESTOP_TICKS = new ConcurrentHashMap<>();
     public static final Map<UUID, Map<UUID, Vec3>> FROZEN = new ConcurrentHashMap<>();
-    static final int CHARGE_DURATION = 25;
-    static final int BARRAGE_DURATION = 30;
-    static final int MAX_CHARGE_TRAVEL = 15;
-    static final int BARRAGE_REACH = 4;
+    // Cooldowns (ticked in each move's tick())
+    public static final Map<UUID, Integer> BARRAGE_CD = new ConcurrentHashMap<>();
+    public static final Map<UUID, Integer> CHARGE_CD = new ConcurrentHashMap<>();
+    public static final Map<UUID, Integer> TIMESTOP_CD = new ConcurrentHashMap<>();
+
+    public static final int CHARGE_DURATION = 25;
+    public static final int BARRAGE_DURATION = 30;
+    public static final int MAX_CHARGE_TRAVEL = 15;
+    public static final int BARRAGE_REACH = 4;
+
+    // Cooldown constants in ticks
+    public static final int BARRAGE_COOLDOWN = 50;
+    public static final int CHARGE_COOLDOWN = 35;
+    public static final int TIMESTOP_COOLDOWN = 400;
 
     public static TheWorldStandEntity getStand(Player player) {
         Integer id = STAND_ENTITY.get(player.getUUID());
@@ -49,6 +59,9 @@ public final class DioStandState {
         CHARGE_TICKS.remove(player.getUUID());
         TIMESTOP_TICKS.remove(player.getUUID());
         FROZEN.remove(player.getUUID());
+        BARRAGE_CD.remove(player.getUUID());
+        CHARGE_CD.remove(player.getUUID());
+        TIMESTOP_CD.remove(player.getUUID());
     }
 
     private DioStandState() {}
