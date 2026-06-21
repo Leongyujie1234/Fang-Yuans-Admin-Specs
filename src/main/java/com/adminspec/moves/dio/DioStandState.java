@@ -5,11 +5,13 @@ import com.adminspec.entity.ModEntities;
 import com.adminspec.entity.TheWorldStandEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class DioStandState {
@@ -18,20 +20,30 @@ public final class DioStandState {
     public static final Map<UUID, Integer> CHARGE_TICKS = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> TIMESTOP_TICKS = new ConcurrentHashMap<>();
     public static final Map<UUID, Map<UUID, Vec3>> FROZEN = new ConcurrentHashMap<>();
-    // Cooldowns (ticked in each move's tick())
     public static final Map<UUID, Integer> BARRAGE_CD = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> CHARGE_CD = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> TIMESTOP_CD = new ConcurrentHashMap<>();
+    // Server-side timestop list (like JCraft's Timestops)
+    static final List<ActiveTimestop> SERVER_TIMESTOPS = new ArrayList<>();
 
-    public static final int CHARGE_DURATION = 25;
-    public static final int BARRAGE_DURATION = 30;
-    public static final int MAX_CHARGE_TRAVEL = 15;
-    public static final int BARRAGE_REACH = 4;
+    // JCraft-exact parameters
+    public static final int BARRAGE_DURATION = 40;
+    public static final int BARRAGE_COOLDOWN = 280;
+    public static final int BARRAGE_INTERVAL = 3;
+    public static final float BARRAGE_DAMAGE = 1.0f;
+    public static final float BARRAGE_KNOCKBACK = 0.25f;
+    public static final int BARRAGE_REACH = 3;
 
-    // Cooldown constants in ticks
-    public static final int BARRAGE_COOLDOWN = 50;
-    public static final int CHARGE_COOLDOWN = 35;
-    public static final int TIMESTOP_COOLDOWN = 400;
+    public static final int CHARGE_WINDUP = 7;
+    public static final int CHARGE_DURATION = 19;
+    public static final int CHARGE_COOLDOWN = 100;
+    public static final float CHARGE_DAMAGE = 5.0f;
+    public static final float CHARGE_KNOCKBACK = 0.25f;
+    public static final double CHARGE_RANGE = 7.5;
+
+    public static final int TIMESTOP_WINDUP = 45;
+    public static final int TIMESTOP_COOLDOWN = 1400;
+    public static final int TIMESTOP_FREEZE_DURATION = 80;
 
     public static TheWorldStandEntity getStand(Player player) {
         Integer id = STAND_ENTITY.get(player.getUUID());
@@ -62,6 +74,59 @@ public final class DioStandState {
         BARRAGE_CD.remove(player.getUUID());
         CHARGE_CD.remove(player.getUUID());
         TIMESTOP_CD.remove(player.getUUID());
+    }
+
+    // Server tick: runs every server tick to process active timestops
+    public static void serverTick() {
+        Iterator<ActiveTimestop> it = SERVER_TIMESTOPS.iterator();
+        while (it.hasNext()) {
+            ActiveTimestop ts = it.next();
+            if (ts.ticksRemaining <= 0 || ts.user == null || !ts.user.isAlive()) {
+                ts.onEnd();
+                it.remove();
+                continue;
+            }
+            ts.ticksRemaining--;
+            ServerLevel sl = ts.world;
+            if (sl == null) continue;
+            Vec3 pos = ts.pos;
+            AABB box = new AABB(pos.add(96, 96, 96), pos.subtract(96, 96, 96));
+            List<Entity> entities = sl.getEntitiesOfClass(Entity.class, box, e -> {
+                if (e == ts.user) return false;
+                if (e.isSpectator()) return false;
+                if (e instanceof Player p && p.isCreative()) return false;
+                return true;
+            });
+            for (Entity e : entities) {
+                if (e instanceof LivingEntity le) {
+                    le.setNoActionTime(2);
+                    e.teleportTo(e.xo, e.yo, e.zo);
+                    e.setDeltaMovement(Vec3.ZERO);
+                    e.xRotO = e.getXRot();
+                    e.yRotO = e.getYRot();
+                    if (e instanceof LivingEntity le2) {
+                        le2.yBodyRotO = le2.yBodyRot;
+                        le2.yHeadRotO = le2.yHeadRot;
+                        le2.walkDistO = le2.walkDist;
+                    }
+                }
+            }
+        }
+    }
+
+    static class ActiveTimestop {
+        final Entity user;
+        final Vec3 pos;
+        final ServerLevel world;
+        int ticksRemaining;
+
+        ActiveTimestop(Entity user, Vec3 pos, ServerLevel world, int ticks) {
+            this.user = user; this.pos = pos; this.world = world; this.ticksRemaining = ticks;
+        }
+
+        void onEnd() {
+            // timestop ended - unfreezing handled by expiration of noActionTime
+        }
     }
 
     private DioStandState() {}

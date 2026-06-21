@@ -22,6 +22,7 @@ import com.adminspec.client.ClientSetup;
 import com.adminspec.command.AdminSpecCommand;
 import com.adminspec.entity.ModEntities;
 import com.adminspec.item.ModItems;
+import com.adminspec.moves.dio.DioStandState;
 import com.adminspec.moves.ModMoves;
 import com.adminspec.spec.SpecRegistry;
 import com.mojang.brigadier.CommandDispatcher;
@@ -33,6 +34,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 
 @Mod(value="adminspec")
@@ -61,6 +63,7 @@ public class AdminSpecMod {
         NeoForge.EVENT_BUS.addListener(PlayerSpecCapability::onPlayerRespawn);
         NeoForge.EVENT_BUS.addListener(PlayerSpecCapability::onPlayerLoggedIn);
         NeoForge.EVENT_BUS.addListener(PlayerSpecCapability::onPlayerStartTracking);
+        NeoForge.EVENT_BUS.addListener(this::onServerTick);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -68,6 +71,10 @@ public class AdminSpecMod {
 
     private void onRegisterCommands(RegisterCommandsEvent event) {
         AdminSpecCommand.register((CommandDispatcher<CommandSourceStack>)event.getDispatcher());
+    }
+
+    private void onServerTick(ServerTickEvent.Post event) {
+        DioStandState.serverTick();
     }
 }
 
