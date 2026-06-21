@@ -58,7 +58,17 @@ public final class ReverseFlowParticleHandler {
         double pz = player.getZ();
         int ticks = player.tickCount;
 
-        // Dense glowing ring around the body — END_ROD guaranteed visible
+        // Guaranteed visible LAVA + CAMPFIRE_SIGNAL_SMOKE at player position
+        level.addParticle(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, px, py, pz, 0, 0.1, 0);
+        if (ticks % 3 == 0) {
+            level.addParticle(ParticleTypes.LAVA,
+                px + (Math.random() - 0.5) * 0.5,
+                py + Math.random() * 1.8,
+                pz + (Math.random() - 0.5) * 0.5,
+                0, 0, 0);
+        }
+
+        // Dense glowing ring around the body
         for (int i = 0; i < 10; i++) {
             double angle = RANDOM.nextDouble() * Math.PI * 2.0;
             double yOffset = RANDOM.nextDouble() * 2.2;
@@ -94,7 +104,7 @@ public final class ReverseFlowParticleHandler {
             level.addParticle(ParticleTypes.END_ROD, dx, py + yOffset, dz, 0, 0, 0);
         }
 
-        // Pulsing ring at chest level (4 points, large END_ROD)
+        // Pulsing ring at chest level
         double ringRadius = 0.6 + Math.sin(ticks * 0.1) * 0.15;
         for (int i = 0; i < 6; i++) {
             double angle = (ticks * 0.15) + (i * Math.PI / 3.0);

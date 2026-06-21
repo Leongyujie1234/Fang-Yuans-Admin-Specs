@@ -151,9 +151,10 @@ public class AncientSwordDragonTransformationMove extends SpecMove {
             if (toughness != null) toughness.setBaseValue(8.0);
         } catch (Throwable ignored) {}
 
-        // CRITICAL: grant mayfly so the server anti-cheat doesn't rubber-band flight
+        // Grant mayfly so the server anti-cheat doesn't rubber-band flight.
+        // DO NOT set flying=true — vanilla flight logic would override our velocity.
         player.getAbilities().mayfly = true;
-        player.getAbilities().flying = true;
+        player.getAbilities().flying = false;
         player.onUpdateAbilities();
 
         // Launch upward on transform

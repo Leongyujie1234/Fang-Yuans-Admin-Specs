@@ -63,40 +63,32 @@ public final class DragonBreathHandler {
     private static void spawnClientBreathVfx(ClientLevel level, net.minecraft.client.player.LocalPlayer player) {
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getLookAngle();
-        // Dense beam of particles for instant visual feedback
-        for (double d = 0.3; d < 16.0; d += 0.35) {
+        // Spawn a guaranteed-visible beacon of CAMPFIRE_SIGNAL_SMOKE (very tall, dense)
+        for (double d = 0.3; d < 16.0; d += 0.5) {
             Vec3 pos = eye.add(look.scale(d));
-            double spread = d * 0.07;
+            level.addParticle(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE,
+                pos.x, pos.y, pos.z,
+                look.x * 0.2, look.y * 0.2, look.z * 0.2);
             level.addParticle(ParticleTypes.CRIT,
-                pos.x + (Math.random() - 0.5) * spread,
-                pos.y + (Math.random() - 0.5) * spread,
-                pos.z + (Math.random() - 0.5) * spread,
+                pos.x + (Math.random() - 0.5) * 0.5,
+                pos.y + (Math.random() - 0.5) * 0.5,
+                pos.z + (Math.random() - 0.5) * 0.5,
                 look.x * 0.4, look.y * 0.4, look.z * 0.4);
-            level.addParticle(ParticleTypes.ENCHANTED_HIT,
-                pos.x + (Math.random() - 0.5) * spread,
-                pos.y + (Math.random() - 0.5) * spread,
-                pos.z + (Math.random() - 0.5) * spread,
+            level.addParticle(ParticleTypes.SONIC_BOOM,
+                pos.x, pos.y, pos.z,
                 0, 0, 0);
-            level.addParticle(ParticleTypes.END_ROD,
-                pos.x + (Math.random() - 0.5) * spread * 0.5,
-                pos.y + (Math.random() - 0.5) * spread * 0.5,
-                pos.z + (Math.random() - 0.5) * spread * 0.5,
-                0, 0, 0);
-            if (d % 1.5 < 0.35) {
-                level.addParticle(ParticleTypes.SWEEP_ATTACK, pos.x, pos.y, pos.z, 0, 0, 0);
-            }
-            if (d % 2.5 < 0.35) {
-                level.addParticle(ParticleTypes.ELECTRIC_SPARK,
-                    pos.x + (Math.random() - 0.5) * spread * 1.5,
-                    pos.y + (Math.random() - 0.5) * spread * 1.5,
-                    pos.z + (Math.random() - 0.5) * spread * 1.5,
-                    0, 0, 0);
-            }
         }
-        // Tip burst with multiple particle types for guaranteed visibility
+        // Guaranteed visible lava splash at mouth
+        for (int i = 0; i < 10; i++) {
+            level.addParticle(ParticleTypes.LAVA,
+                eye.x + (Math.random() - 0.5) * 0.5,
+                eye.y + (Math.random() - 0.5) * 0.5,
+                eye.z + (Math.random() - 0.5) * 0.5,
+                0, 0, 0);
+        }
+        // Tip burst
         Vec3 tip = eye.add(look.scale(16.0));
         level.addParticle(ParticleTypes.FLASH, tip.x, tip.y, tip.z, 0, 0, 0);
-        level.addParticle(ParticleTypes.END_ROD, tip.x, tip.y + 0.5, tip.z, 0, 0, 0);
         for (int i = 0; i < 12; i++) {
             level.addParticle(ParticleTypes.EXPLOSION,
                 tip.x + (Math.random() - 0.5) * 2.5,
@@ -104,7 +96,6 @@ public final class DragonBreathHandler {
                 tip.z + (Math.random() - 0.5) * 2.5,
                 0, 0, 0);
         }
-        // Sound
         level.playLocalSound(eye.x, eye.y, eye.z,
             net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_SWEEP,
             net.minecraft.sounds.SoundSource.PLAYERS, 1.5f, 0.7f, false);

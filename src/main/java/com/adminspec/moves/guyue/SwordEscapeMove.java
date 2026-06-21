@@ -40,7 +40,7 @@ public class SwordEscapeMove extends SpecMove {
     public static final String ID = "sword_escape";
     private static final int COOLDOWN_TICKS = 100;
     private static final int DASH_DURATION_TICKS = 12;
-    private static final float DAMAGE = 2.0f;
+    private static final float DAMAGE = 0.0f;
     private static final double DASH_INITIAL_SPEED = 3.0;
     private static final double DASH_DECAY_FACTOR = 0.85;
     private static final DustParticleOptions BLOOD_PARTICLE = new DustParticleOptions(new Vector3f(0.75f, 0.0f, 0.0f), 2.0f);

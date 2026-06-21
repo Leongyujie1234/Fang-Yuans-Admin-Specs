@@ -163,7 +163,7 @@ public final class ClientDragonFormRenderer {
             pose.mulPose(Axis.YP.rotationDegrees(-yaw - 90));
             float s = 2.0f;
             pose.scale(s, s, s);
-            VertexConsumer consumer = bufSource.getBuffer(RenderType.entityTranslucent(
+            VertexConsumer consumer = bufSource.getBuffer(RenderType.entityCutoutNoCull(
                 ResourceLocation.withDefaultNamespace("textures/entity/enderdragon/dragon.png")));
             drawBox(pose.last(), consumer, -0.5f, -0.5f, -0.5f, 1f, 1f, 1f,
                 0, 0, 64, 64, light, 0x00A00000, 1f, 1f, 1f, 1f);
@@ -184,7 +184,7 @@ public final class ClientDragonFormRenderer {
             }
         }
 
-        VertexConsumer consumer = bufSource.getBuffer(RenderType.entityTranslucent(texture));
+        VertexConsumer consumer = bufSource.getBuffer(RenderType.entityCutoutNoCull(texture));
 
         if (ticks >= 60) {
             event.setCanceled(true);
