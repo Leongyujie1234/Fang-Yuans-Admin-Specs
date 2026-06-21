@@ -61,43 +61,11 @@ public final class DragonBreathHandler {
     }
 
     private static void spawnClientBreathVfx(ClientLevel level, net.minecraft.client.player.LocalPlayer player) {
-        Vec3 eye = player.getEyePosition();
-        Vec3 look = player.getLookAngle();
-        // Spawn a guaranteed-visible beacon of CAMPFIRE_SIGNAL_SMOKE (very tall, dense)
-        for (double d = 0.3; d < 16.0; d += 0.5) {
-            Vec3 pos = eye.add(look.scale(d));
-            level.addParticle(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE,
-                pos.x, pos.y, pos.z,
-                look.x * 0.2, look.y * 0.2, look.z * 0.2);
-            level.addParticle(ParticleTypes.CRIT,
-                pos.x + (Math.random() - 0.5) * 0.5,
-                pos.y + (Math.random() - 0.5) * 0.5,
-                pos.z + (Math.random() - 0.5) * 0.5,
-                look.x * 0.4, look.y * 0.4, look.z * 0.4);
-            level.addParticle(ParticleTypes.SONIC_BOOM,
-                pos.x, pos.y, pos.z,
-                0, 0, 0);
-        }
-        // Guaranteed visible lava splash at mouth
-        for (int i = 0; i < 10; i++) {
-            level.addParticle(ParticleTypes.LAVA,
-                eye.x + (Math.random() - 0.5) * 0.5,
-                eye.y + (Math.random() - 0.5) * 0.5,
-                eye.z + (Math.random() - 0.5) * 0.5,
-                0, 0, 0);
-        }
-        // Tip burst
-        Vec3 tip = eye.add(look.scale(16.0));
-        level.addParticle(ParticleTypes.FLASH, tip.x, tip.y, tip.z, 0, 0, 0);
-        for (int i = 0; i < 12; i++) {
-            level.addParticle(ParticleTypes.EXPLOSION,
-                tip.x + (Math.random() - 0.5) * 2.5,
-                tip.y + (Math.random() - 0.5) * 2.5,
-                tip.z + (Math.random() - 0.5) * 2.5,
-                0, 0, 0);
-        }
-        level.playLocalSound(eye.x, eye.y, eye.z,
-            net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_SWEEP,
-            net.minecraft.sounds.SoundSource.PLAYERS, 1.5f, 0.7f, false);
+        // ULTRA-SIMPLE TEST: flame particle at player feet every tick
+        level.addParticle(ParticleTypes.FLAME,
+            player.getX(), player.getY() + 0.5, player.getZ(),
+            0, 0.1, 0);
+        net.minecraft.network.chat.Component msg = net.minecraft.network.chat.Component.literal("§c[DEBUG] Breath VFX spawned");
+        if (player != null) player.sendSystemMessage(msg);
     }
 }

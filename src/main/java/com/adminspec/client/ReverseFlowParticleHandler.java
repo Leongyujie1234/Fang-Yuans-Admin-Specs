@@ -27,28 +27,22 @@ public final class ReverseFlowParticleHandler {
     public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
-        if (level == null) {
-            return;
-        }
-        boolean found = false;
+        if (level == null || mc.player == null) return;
+
+        // ULTRA-SIMPLE TEST: always spawn a flame at player position
+        level.addParticle(ParticleTypes.FLAME,
+            mc.player.getX(), mc.player.getY() + 0.5, mc.player.getZ(),
+            0, 0.1, 0);
+        mc.player.sendSystemMessage(
+            net.minecraft.network.chat.Component.literal("§b[DEBUG] ReverseFlow handler ticking"));
+
+        // Also check real state and spawn robe
         for (Player player : level.players()) {
             ClientSpecState.Snapshot snap = ClientSpecState.get(player.getUUID());
             if (snap == null) continue;
             if (!snap.reverseFlowActive) continue;
-            found = true;
             spawnRobe(level, player);
-            // Debug: force a visible particle at player position every few ticks
-            if (player.tickCount % 20 == 0) {
-                LOGGER.info("[AdminSpec] ReverseFlow active for {}", player.getName().getString());
-                level.addParticle(ParticleTypes.FLAME,
-                    player.getX(), player.getY() + 1.0, player.getZ(),
-                    0, 0.1, 0);
-            }
-        }
-        if (!found && !debugOnce) {
-            debugOnce = true;
-        } else if (found) {
-            debugOnce = false;
+            LOGGER.info("[AdminSpec] ReverseFlow active for {}", player.getName().getString());
         }
     }
 

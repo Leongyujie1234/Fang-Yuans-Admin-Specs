@@ -152,8 +152,8 @@ public final class ClientDragonFormRenderer {
         MultiBufferSource bufSource = event.getMultiBufferSource();
         float pt = event.getPartialTick();
 
-        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath("adminspec",
-            "textures/entity/ancient_sword_dragon.png");
+        // Use vanilla ender dragon texture for testing (known-good with entityCutoutNoCull)
+        ResourceLocation texture = ResourceLocation.withDefaultNamespace("textures/entity/enderdragon/dragon.png");
         int light = event.getPackedLight();
 
         if (dragonModel == null) {
