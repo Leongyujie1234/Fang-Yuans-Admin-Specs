@@ -32,10 +32,3 @@ First spec: Rank 7 Liu Guan Yi with four moves:
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
-
-[[dependencies.${mod_id}]]
-    modId="azurelib"
-    type="required"
-    versionRange="[2,)"
-    ordering="NONE"
-    side="BOTH"

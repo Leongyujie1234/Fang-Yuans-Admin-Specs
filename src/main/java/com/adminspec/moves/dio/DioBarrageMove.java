@@ -36,10 +36,10 @@ public class DioBarrageMove extends SpecMove {
             sp.sendSystemMessage(Component.literal("§e[Barrage] §7Cooldown: §f" + String.format("%.1f", cd / 20.0) + "s"));
             return;
         }
-        TheWorldStandEntity stand = DioStandState.getStand(sp);
-        if (stand != null) stand.playAnimation("animation.theworld.barrage");
         DioStandState.BARRAGE_TICKS.put(sp.getUUID(), DioStandState.BARRAGE_DURATION);
         DioStandState.BARRAGE_CD.put(sp.getUUID(), DioStandState.BARRAGE_COOLDOWN);
+        TheWorldStandEntity stand = DioStandState.getStand(sp);
+        if (stand != null) stand.playAnimation("animation.theworld.barrage");
         sp.sendSystemMessage(Component.literal("§e§lMUDA MUDA MUDA!"));
     }
 

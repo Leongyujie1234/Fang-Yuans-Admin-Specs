@@ -1,6 +1,5 @@
 package com.adminspec.entity;
 
-import com.adminspec.moves.dio.DioStandState;
 import mod.azure.azurelib.common.api.common.animatable.GeoEntity;
 import mod.azure.azurelib.core.animatable.instance.AnimatableInstanceCache;
 import mod.azure.azurelib.core.animation.AnimatableManager;
