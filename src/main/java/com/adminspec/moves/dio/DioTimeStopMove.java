@@ -1,9 +1,9 @@
 package com.adminspec.moves.dio;
 
 import com.adminspec.entity.TheWorldStandEntity;
+import com.adminspec.network.TimeStopVfxPayload;
 import com.adminspec.spec.MoveContext;
 import com.adminspec.spec.SpecMove;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -19,12 +20,12 @@ import java.util.function.Predicate;
 public class DioTimeStopMove extends SpecMove {
     public static final String ID = "dio_timestop";
     private static final int RADIUS = 20;
-    private static final int DURATION = 60;
+    private static final int DURATION = 120;
 
     public DioTimeStopMove() {
         super(ID,
             Component.literal("The World - Time Stop"),
-            Component.literal("Freeze all entities in a 20-block radius for 3 seconds."));
+            Component.literal("Freeze all entities in a 20-block radius for 6 seconds."));
     }
 
     @Override
@@ -53,8 +54,8 @@ public class DioTimeStopMove extends SpecMove {
         DioStandState.FROZEN.put(sp.getUUID(), frozen);
         DioStandState.TIMESTOP_TICKS.put(sp.getUUID(), DURATION);
 
-        sl.sendParticles(ParticleTypes.FLASH, sp.getX(), sp.getY() + 1, sp.getZ(), 1, 0, 0, 0, 0);
-        sl.sendParticles(ParticleTypes.EXPLOSION, sp.getX(), sp.getY() + 1, sp.getZ(), 8, 2, 1, 2, 0.1);
+        // Send gray overlay to caster only
+        PacketDistributor.sendToPlayer(sp, new TimeStopVfxPayload(sp.getUUID(), true));
         sp.sendSystemMessage(Component.literal("§5§lZA WARUDO! TOKI WO TOMARE!"));
     }
 
@@ -82,16 +83,12 @@ public class DioTimeStopMove extends SpecMove {
             }
         }
 
-        double px = sp.getX(), py = sp.getY() + 1, pz = sp.getZ();
-        sl.sendParticles(ParticleTypes.END_ROD, px, py, pz, 6, 2, 1.5, 2, 0.05);
-        sl.sendParticles(ParticleTypes.ELECTRIC_SPARK, px, py, pz, 4, 2, 1.5, 2, 0.1);
-
         ticks--;
         if (ticks <= 0) {
             DioStandState.TIMESTOP_TICKS.remove(uuid);
             DioStandState.FROZEN.remove(uuid);
             sp.sendSystemMessage(Component.literal("§e[The World] §7Time resumes."));
-            sl.sendParticles(ParticleTypes.EXPLOSION, px, py, pz, 5, 2, 1.5, 2, 0.1);
+            PacketDistributor.sendToPlayer(sp, new TimeStopVfxPayload(sp.getUUID(), false));
         } else {
             DioStandState.TIMESTOP_TICKS.put(uuid, ticks);
         }

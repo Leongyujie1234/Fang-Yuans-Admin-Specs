@@ -3,7 +3,6 @@ package com.adminspec.moves.dio;
 import com.adminspec.entity.TheWorldStandEntity;
 import com.adminspec.spec.MoveContext;
 import com.adminspec.spec.SpecMove;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -64,23 +63,6 @@ public class DioBarrageMove extends SpecMove {
             v.setDeltaMovement(look.scale(0.4).add(0, 0.15, 0));
             v.hurtMarked = true;
         }
-
-        for (int i = 0; i < 6; i++) {
-            double spread = 0.5;
-            Vec3 pos = eye.add(look.scale(0.5 + Math.random() * 2.0));
-            sl.sendParticles(ParticleTypes.CRIT,
-                pos.x + (Math.random() - 0.5) * spread,
-                pos.y + (Math.random() - 0.5) * spread + 0.5,
-                pos.z + (Math.random() - 0.5) * spread,
-                1, 0, 0, 0, 0.05);
-            sl.sendParticles(ParticleTypes.ENCHANTED_HIT,
-                pos.x + (Math.random() - 0.5) * spread,
-                pos.y + (Math.random() - 0.5) * spread + 0.5,
-                pos.z + (Math.random() - 0.5) * spread,
-                1, 0, 0, 0, 0.02);
-        }
-        sl.sendParticles(ParticleTypes.SWEEP_ATTACK,
-            eye.x + look.x * 1.5, eye.y, eye.z + look.z * 1.5, 2, 0.3, 0.3, 0.3, 0);
 
         ticks--;
         if (ticks <= 0) {

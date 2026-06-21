@@ -3,7 +3,6 @@ package com.adminspec.moves.dio;
 import com.adminspec.entity.TheWorldStandEntity;
 import com.adminspec.spec.MoveContext;
 import com.adminspec.spec.SpecMove;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,7 +34,6 @@ public class DioChargeMove extends SpecMove {
         TheWorldStandEntity stand = DioStandState.getStand(sp);
         if (stand == null) return;
         stand.playAnimation("animation.theworld.charge");
-        // Store the charge trajectory: direction is player's look, starting from stand's position
         Vec3 dir = sp.getLookAngle();
         stand.getPersistentData().putDouble("chargeDirX", dir.x);
         stand.getPersistentData().putDouble("chargeDirY", dir.y);
@@ -78,11 +76,6 @@ public class DioChargeMove extends SpecMove {
             double speed = 0.8;
             stand.setDeltaMovement(dir.scale(speed));
             stand.hurtMarked = true;
-
-            sl.sendParticles(ParticleTypes.END_ROD,
-                stand.getX(), stand.getY() + 0.8, stand.getZ(), 4, 0.2, 0.5, 0.2, 0.02);
-            sl.sendParticles(ParticleTypes.SWEEP_ATTACK,
-                stand.getX(), stand.getY() + 0.8, stand.getZ(), 1, 0.4, 0.4, 0.4, 0);
 
             AABB hitBox = stand.getBoundingBox().inflate(1.0);
             List<LivingEntity> victims = sl.getEntitiesOfClass(LivingEntity.class, hitBox,

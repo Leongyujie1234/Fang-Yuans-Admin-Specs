@@ -17,6 +17,7 @@ import com.adminspec.network.DragonFlightInputPayload;
 import com.adminspec.network.DragonFormPayload;
 import com.adminspec.network.SpecStatePayload;
 import com.adminspec.network.SwordEscapeBeamPayload;
+import com.adminspec.network.TimeStopVfxPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -37,6 +38,7 @@ public final class ModPayloads {
         reg.playToClient(SpecStatePayload.TYPE, SpecStatePayload.STREAM_CODEC, SpecStatePayload::handle);
         reg.playToClient(DragonFormPayload.TYPE, DragonFormPayload.STREAM_CODEC, DragonFormPayload::handle);
         reg.playToClient(DragonBreathVfxPayload.TYPE, DragonBreathVfxPayload.STREAM_CODEC, DragonBreathVfxPayload::handle);
+        reg.playToClient(TimeStopVfxPayload.TYPE, TimeStopVfxPayload.STREAM_CODEC, TimeStopVfxPayload::handle);
     }
 }
 
