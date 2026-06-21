@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
@@ -23,10 +24,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.joml.Vector3f;
 
 public class AncientSwordDragonTransformationMove extends SpecMove {
     public static final String ID = "ancient_sword_dragon_transformation";
 
+    private static final DustParticleOptions BREATH_DUST = new DustParticleOptions(new Vector3f(0.3f, 0.7f, 1.0f), 1.5f);
     private static final float  BREATH_DAMAGE    = 6.0f;
     private static final double BREATH_RANGE     = 16.0;
 
@@ -233,6 +236,7 @@ public class AncientSwordDragonTransformationMove extends SpecMove {
         sl.sendParticles(ParticleTypes.FLASH, eye.x, eye.y, eye.z, 1, 0, 0, 0, 0);
         sl.sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, eye.x, eye.y, eye.z, 3, 0.3, 0.3, 0.3, 0.1);
         sl.sendParticles(ParticleTypes.LAVA, eye.x, eye.y, eye.z, 5, 0.4, 0.4, 0.4, 0);
+        sl.sendParticles(BREATH_DUST, eye.x, eye.y + 0.5, eye.z, 15, 0.6, 0.4, 0.6, 0);
 
         // Server-side particles (visible to all via broadcast overload)
         for (double d = 0.5; d < BREATH_RANGE; d += 0.5) {
@@ -273,7 +277,7 @@ public class AncientSwordDragonTransformationMove extends SpecMove {
             v.hurt(sl.damageSources().playerAttack(player), BREATH_DAMAGE);
         }
 
-        data.setDragonBreathCooldown(15); // 0.75 seconds
+        data.setDragonBreathCooldown(5);
 
         // Tell all nearby clients to play local VFX
         PacketDistributor.sendToPlayersNear(
