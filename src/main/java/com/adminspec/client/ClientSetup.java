@@ -18,6 +18,8 @@ package com.adminspec.client;
 import com.adminspec.AdminSpecMod;
 import com.adminspec.client.FlyingHeadRenderer;
 import com.adminspec.client.MoveKeybinds;
+import com.adminspec.client.renderer.KnifeProjectileRenderer;
+import com.adminspec.client.renderer.TheWorldStandRenderer;
 import com.adminspec.entity.ModEntities;
 import com.adminspec.spec.Spec;
 import com.adminspec.spec.SpecMove;
@@ -33,7 +35,7 @@ import net.neoforged.neoforge.client.settings.IKeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 
 public final class ClientSetup {
-    private static final int[] DEFAULT_KEYS = new int[]{49, 50, 51, 52, 53, 54, 55, 56};
+    private static final int[] DEFAULT_KEYS = new int[]{49, 50, 51, 52, 53, 54, 55};
 
     private ClientSetup() {
     }
@@ -58,6 +60,8 @@ public final class ClientSetup {
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer((EntityType)ModEntities.FLYING_HEAD.get(), FlyingHeadRenderer::new);
         event.registerEntityRenderer((EntityType)ModEntities.YAMA_CHILD.get(), YamaChildRenderer::new);
+        event.registerEntityRenderer((EntityType)ModEntities.THE_WORLD.get(), TheWorldStandRenderer::new);
+        event.registerEntityRenderer((EntityType)ModEntities.KNIFE.get(), KnifeProjectileRenderer::new);
     }
 }
 

@@ -21,6 +21,7 @@ import com.adminspec.capability.PlayerSpecCapability;
 import com.adminspec.client.ClientSetup;
 import com.adminspec.command.AdminSpecCommand;
 import com.adminspec.entity.ModEntities;
+import com.adminspec.item.ModItems;
 import com.adminspec.moves.ModMoves;
 import com.adminspec.spec.SpecRegistry;
 import com.mojang.brigadier.CommandDispatcher;
@@ -41,6 +42,7 @@ public class AdminSpecMod {
 
     public AdminSpecMod(IEventBus modBus) {
         ModEntities.ENTITIES.register(modBus);
+        ModItems.ITEMS.register(modBus);
         ModMoves.MOVES.register(modBus);
         ModSounds.SOUND_EVENTS.register(modBus);
         PlayerSpecCapability.ATTACHMENT_TYPES.register(modBus);
