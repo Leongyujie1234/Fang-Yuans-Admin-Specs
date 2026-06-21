@@ -33,7 +33,7 @@ import net.neoforged.neoforge.client.settings.IKeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 
 public final class ClientSetup {
-    private static final int[] DEFAULT_KEYS = new int[]{49, 50, 51, 52};
+    private static final int[] DEFAULT_KEYS = new int[]{49, 50, 51, 52, 53, 54, 55, 56};
 
     private ClientSetup() {
     }
