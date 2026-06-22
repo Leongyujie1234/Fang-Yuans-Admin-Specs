@@ -39,6 +39,10 @@ public class DioChargeMove extends SpecMove {
         stand.getPersistentData().putDouble("cox", stand.getX()); stand.getPersistentData().putDouble("coy", stand.getY()); stand.getPersistentData().putDouble("coz", stand.getZ());
         DioStandState.CHARGE_TICKS.put(sp.getUUID(), DioStandState.CHARGE_DURATION);
         DioStandState.CHARGE_CD.put(sp.getUUID(), DioStandState.CHARGE_COOLDOWN);
+        // Marker particles at activation
+        ServerLevel sl = (ServerLevel) sp.level();
+        sl.sendParticles(ParticleTypes.EXPLOSION, sp.getX(), sp.getY() + 1, sp.getZ(), 2, 0.5, 0.5, 0.5, 0);
+        sl.sendParticles(ParticleTypes.FLASH, sp.getX(), sp.getY() + 1, sp.getZ(), 1, 0, 0, 0, 0);
         sp.sendSystemMessage(Component.literal("§e§lTHE WORLD!"));
     }
 

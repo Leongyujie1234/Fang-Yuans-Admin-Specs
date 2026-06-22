@@ -53,6 +53,11 @@ public class DioBarrageMove extends SpecMove {
             ServerLevel sl = (ServerLevel) sp.level();
             Vec3 look = sp.getLookAngle();
             Vec3 eye = sp.getEyePosition();
+
+            // Guaranteed marker particles at player's position (same pattern as dragon breath)
+            sl.sendParticles(ParticleTypes.EXPLOSION, eye.x, eye.y, eye.z, 1, 0.3, 0.3, 0.3, 0);
+            sl.sendParticles(ParticleTypes.FLASH, eye.x, eye.y, eye.z, 1, 0, 0, 0, 0);
+
             AABB box = sp.getBoundingBox().expandTowards(look.scale(DioStandState.BARRAGE_REACH)).inflate(1.5);
             List<LivingEntity> hits = sl.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && !e.equals(sp));
             for (LivingEntity v : hits) {

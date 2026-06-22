@@ -42,6 +42,8 @@ public class DioTimeStopMove extends SpecMove {
         double px = sp.getX(); double py = sp.getY(); double pz = sp.getZ();
         sl.sendParticles(ParticleTypes.DRAGON_BREATH, px, py + 0.5, pz, 20, 2.0, 2.0, 2.0, 0.01);
         sl.sendParticles(ParticleTypes.FLASH, px, py + 0.5, pz, 1, 0.0, 0.0, 0.0, 0.0);
+        // Guaranteed explosion markers for visibility
+        sl.sendParticles(ParticleTypes.EXPLOSION, px, py + 0.5, pz, 3, 0.5, 0.5, 0.5, 0);
         for (int i = 0; i < 12; ++i) {
             double angle = Math.random() * Math.PI * 2.0;
             sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, px + Math.cos(angle) * 3.0, py + 0.5, pz + Math.sin(angle) * 3.0, 1, 0.02, 0.02, 0.02, 0.0);
